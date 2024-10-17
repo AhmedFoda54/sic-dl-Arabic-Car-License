@@ -1,11 +1,11 @@
 import cv2
+cv2.imshow = lambda *args: None
+
 import numpy as np
 from PIL import Image
 import streamlit as st
 from ultralytics import YOLO
-import matplotlib.pyplot as plt
 import easyocr
-import os
 
 
 # Function to apply morphological operations: dilation, erosion, and gap filling
