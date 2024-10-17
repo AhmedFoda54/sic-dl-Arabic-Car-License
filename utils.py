@@ -158,7 +158,7 @@ def detect_text_easyocr(cropped_image):
     reader = easyocr.Reader(['ar'], gpu=True)  # Arabic only
 
     # Step 3: Perform OCR directly on the image
-    results = reader.readtext(processed_image)
+    results = reader.readtext(image_np)
 
     # Step 4: Prepare a list to store detected text with confidence
     detected_texts = []
