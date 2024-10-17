@@ -90,10 +90,10 @@ def crop_LowerPart_Plate(yolo_model, img, width_margin=20, y_offset=5):
                 # processed_image.save(cropped_image_path)
 
                 # Resize the cropped image to a standard size (130x130)
-                resized_cropped_image = cropped_image.resize((100, 130))
+                # resized_cropped_image = cropped_image.resize((100, 130))
 
                 # Return the final image (cropped and resized)
-                return resized_cropped_image
+                return cropped_image
 
         else:
             st.write("No bounding boxes detected.")
