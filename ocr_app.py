@@ -30,19 +30,21 @@ if uploaded_file is not None:
 
         # Perform OCR on the cropped image
         st.spinner("Performing OCR on the cropped image...")
-        easyocr_results = detect_text_easyocr(cropped_image)
-        yolocr_results, nums, chars = detect_text_yolo(ocr_yolo_model, cropped_image)
+        easyocr_image, easyocr_text = detect_text_easyocr(cropped_image)
+        yolo_results, nums, chars = detect_text_yolo(ocr_yolo_model, cropped_image)
 
         st.subheader("YOLO OCR")
-        st.image(yolocr_results, caption="YOLO OCR", use_column_width=True)
+        st.image(yolo_results, caption="YOLO OCR", use_column_width=True)
         st.write(f"Detected Numbers: {nums} and detected Chars: {chars}")
 
         st.subheader("Easy OCR")
-        st.spinner("Performing Easy OCR on the yolo image...")
+        st.spinner("Performing Easy OCR on the image...")
         # Display OCR results
-        if easyocr_results:
+
+        st.image(easyocr_image, caption="EasyOCR", use_column_width=True)
+        if easyocr_text:
             st.write("Detected Text:")
-            for text, confidence in easyocr_results:
+            for text, confidence in easyocr_text:
                 st.write(f"Text: {text}, Confidence: {confidence}")
         else:
             st.write("No text detected.")
