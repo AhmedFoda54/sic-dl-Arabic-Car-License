@@ -86,14 +86,11 @@ def crop_LowerPart_Plate(yolo_model, img, width_margin=20, y_offset=5):
                 # Crop the image using the adjusted bounding box
                 cropped_image = image.crop((x_min, y_min, x_max, y_max))
 
-                # Apply morphological operations on the cropped image
-                processed_image = apply_morphological_operations(cropped_image)
-
-                cropped_image_path = 'cropped_plate_image.jpg'  # Specify the path to save the cropped image
-                processed_image.save(cropped_image_path)
+                # cropped_image_path = 'cropped_plate_image.jpg'  # Specify the path to save the cropped image
+                # processed_image.save(cropped_image_path)
 
                 # Resize the cropped image to a standard size (130x130)
-                resized_cropped_image = processed_image.resize((130, 130))
+                resized_cropped_image = cropped_image.resize((130, 130))
 
                 # Return the final image (cropped and resized)
                 return resized_cropped_image
@@ -150,13 +147,18 @@ def detect_text_easyocr(cropped_image):
     :return: list of tuples (detected_text, confidence)
     """
     # Step 1: Read the image using OpenCV
-    image_np = np.array(cropped_image)
+    image = np.array(cropped_image)
+
+    # Apply morphological operations on the cropped image
+    processed_image = apply_morphological_operations(image)
+
+    image_np = processed_image.copy()
 
     # Step 2: Create an EasyOCR reader for Arabic text only
     reader = easyocr.Reader(['ar'], gpu=True)  # Arabic only
 
     # Step 3: Perform OCR directly on the image
-    results = reader.readtext(image_np)
+    results = reader.readtext(processed_image)
 
     # Step 4: Prepare a list to store detected text with confidence
     detected_texts = []
