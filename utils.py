@@ -152,13 +152,11 @@ def detect_text_easyocr(cropped_image):
     # Apply morphological operations on the cropped image
     processed_image = apply_morphological_operations(image)
 
-    image_np = processed_image.copy()
-
     # Step 2: Create an EasyOCR reader for Arabic text only
     reader = easyocr.Reader(['ar'], gpu=True)  # Arabic only
 
     # Step 3: Perform OCR directly on the image
-    results = reader.readtext(image_np)
+    results = reader.readtext(processed_image)
 
     # Step 4: Prepare a list to store detected text with confidence
     detected_texts = []
@@ -185,15 +183,15 @@ def detect_text_easyocr(cropped_image):
 
             # Ensure the coordinates are within image bounds
             top_left = (max(top_left[0], 0), max(top_left[1], 0))
-            bottom_right = (min(bottom_right[0], image_np.shape[1]), min(bottom_right[1], image_np.shape[0]))
+            bottom_right = (min(bottom_right[0], processed_image.shape[1]), min(bottom_right[1], processed_image.shape[0]))
 
             # Draw the expanded bounding box
-            cv2.rectangle(image_np, top_left, bottom_right, (0, 255, 0), 2)
+            cv2.rectangle(processed_image, top_left, bottom_right, (0, 255, 0), 2)
 
         # If the leftmost character is not detected, use a separate model
         if not is_character_detected(leftmost_text):
             print("Leftmost character not detected, extracting left side of the image.")
-            left_side_image = extract_left_side(image_np)
+            left_side_image = extract_left_side(processed_image)
             leftmost_character = recognize_leftmost_character(left_side_image)
             print(f"Detected leftmost character: {leftmost_character}")
 
