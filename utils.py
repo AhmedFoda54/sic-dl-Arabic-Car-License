@@ -68,8 +68,7 @@ def crop_LowerPart_Plate(yolo_model, img, width_margin=20, y_offset=5):
             if selected_box is not None:
                 # Adjust the bounding box coordinates
                 x_min = int(selected_box[0].item()) - width_margin  # Decrease x_min for more width
-                y_min = int(selected_box[1].item()) + (int(selected_box[3].item()) - int(
-                    selected_box[1].item())) // 2 - y_offset  # Start above the midpoint
+                y_min = int(selected_box[1].item())  # Start above the midpoint
                 x_max = int(selected_box[2].item()) + width_margin  # Increase x_max for more width
                 y_max = int(selected_box[3].item())  # Keep y_max as is
 
