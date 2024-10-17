@@ -1,8 +1,6 @@
 streamlit
 ultralytics
 easyocr
-paddle
-paddleocr
 pillow
 cv2
 numpy
