@@ -90,10 +90,10 @@ def crop_LowerPart_Plate(yolo_model, img, width_margin=20, y_offset=5):
                 # processed_image.save(cropped_image_path)
 
                 # Resize the cropped image to a standard size (130x130)
-                resized_cropped_image = cropped_image.resize((130, 130))
+                # resized_cropped_image = cropped_image.resize((130, 130))
 
                 # Return the final image (cropped and resized)
-                return resized_cropped_image
+                return cropped_image
 
         else:
             st.write("No bounding boxes detected.")
@@ -143,7 +143,7 @@ def detect_text_easyocr(cropped_image):
     This function takes the path to an image, performs OCR using EasyOCR, and returns the detected text.
     It also displays the image with bounding boxes around detected text.
 
-    :param image_path: str, path to the input image
+    :param cropped_image: np.array, image cropped.
     :return: list of tuples (detected_text, confidence)
     """
     # Step 1: Read the image using OpenCV
@@ -152,11 +152,13 @@ def detect_text_easyocr(cropped_image):
     # Apply morphological operations on the cropped image
     processed_image = apply_morphological_operations(image)
 
+    image_np = np.array(processed_image)
+
     # Step 2: Create an EasyOCR reader for Arabic text only
     reader = easyocr.Reader(['ar'], gpu=True)  # Arabic only
 
     # Step 3: Perform OCR directly on the image
-    results = reader.readtext(processed_image)
+    results = reader.readtext(image_np)
 
     # Step 4: Prepare a list to store detected text with confidence
     detected_texts = []
@@ -183,18 +185,17 @@ def detect_text_easyocr(cropped_image):
 
             # Ensure the coordinates are within image bounds
             top_left = (max(top_left[0], 0), max(top_left[1], 0))
-            bottom_right = (min(bottom_right[0], processed_image.shape[1]), min(bottom_right[1], processed_image.shape[0]))
+            bottom_right = (min(bottom_right[0], image_np.shape[1]), min(bottom_right[1], image_np.shape[0]))
 
             # Draw the expanded bounding box
-            cv2.rectangle(processed_image, top_left, bottom_right, (0, 255, 0), 2)
+            cv2.rectangle(image_np, top_left, bottom_right, (0, 255, 0), 2)
 
         # If the leftmost character is not detected, use a separate model
         if not is_character_detected(leftmost_text):
             print("Leftmost character not detected, extracting left side of the image.")
-            left_side_image = extract_left_side(processed_image)
+            left_side_image = extract_left_side(image_np)
             leftmost_character = recognize_leftmost_character(left_side_image)
             print(f"Detected leftmost character: {leftmost_character}")
-
 
     return image_np, detected_texts
 
@@ -226,7 +227,6 @@ def detect_text_yolo(ocr_yolo_model, cropped_image):
                 detected_numbers.append(recognized_text)
             else:  # Otherwise, it's a letter, add to the letters list
                 detected_letters.append(recognized_text)
-
 
     # Load the recognized image
     recognized_image = np.array(result[0])
