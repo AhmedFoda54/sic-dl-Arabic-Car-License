@@ -90,7 +90,7 @@ def crop_LowerPart_Plate(yolo_model, img, width_margin=20, y_offset=5):
                 # processed_image.save(cropped_image_path)
 
                 # Resize the cropped image to a standard size (130x130)
-                resized_cropped_image = cropped_image.resize((130, 130))
+                resized_cropped_image = cropped_image.resize((100, 130))
 
                 # Return the final image (cropped and resized)
                 return resized_cropped_image
@@ -146,8 +146,10 @@ def detect_text_easyocr(cropped_image):
     :param cropped_image: np.array, image cropped.
     :return: list of tuples (detected_text, confidence)
     """
-    # Step 1: Read the image using OpenCV
-    image = np.array(cropped_image)
+    image = cv2.cvtColor(np.array(cropped_image), cv2.COLOR_RGB2BGR)
+    #     image = cropped_image
+    if image.dtype != 'uint8':
+        image = (image * 255).astype('uint8')
 
     # Apply morphological operations on the cropped image
     processed_image = apply_morphological_operations(image)
