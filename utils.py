@@ -229,7 +229,7 @@ def detect_text_yolo(ocr_yolo_model, cropped_image):
                 detected_letters.append(recognized_text)
 
     # Load the recognized image
-    recognized_image = np.array(result[0])
+    recognized_image = np.array(result[0].plot())
 
     # Return the recognized image
     return recognized_image, detected_numbers, detected_letters
