@@ -151,9 +151,9 @@ def detect_text_easyocr(cropped_image):
         image = (image * 255).astype('uint8')
 
     # Apply morphological operations on the cropped image
-    # processed_image = apply_morphological_operations(image)
+    processed_image = apply_morphological_operations(image)
 
-    image_np = np.array(image)
+    image_np = np.array(processed_image)
 
     # Step 2: Create an EasyOCR reader for Arabic text only
     reader = easyocr.Reader(['ar'], gpu=True)  # Arabic only
