@@ -2,5 +2,5 @@ streamlit==1.38.0
 ultralytics==8.3.15
 easyocr==1.7.2
 pillow==10.4.0
-cv2==4.10.0
+opencv-python==4.5.5.64  # Replaces cv2
 numpy==1.26.4
