@@ -1,6 +1,6 @@
 import streamlit as st
 from PIL import Image
-from utils import crop_LowerPart_Plate, detect_text_easyocr, detect_text_yolo
+from utils import crop_LowerPart_Plate, detect_text_easyocr, detect_text_yolo, process_video_with_plate_detection
 
 
 yolo_model = 'models/yolo11m_car_plate_trained.pt'
@@ -50,3 +50,20 @@ if uploaded_file is not None:
             st.write("No text detected.")
     else:
         st.write("No car plate detected in the image.")
+
+# Streamlit application for video uploading and processing
+st.title("Car Plate Detection from Video")
+
+# Upload video file
+uploaded_video = st.file_uploader("Upload a video", type=["mp4", "avi", "mov"])
+
+# Process the video if a file is uploaded
+if uploaded_video is not None:
+    st.video(uploaded_video)
+
+    with st.spinner("Processing video..."):
+        # Process the video and get the path to the saved output file
+        processed_video_path = process_video_with_plate_detection(uploaded_video, yolo_model, ocr_yolo_model)
+
+        # Display the processed video
+        st.video(processed_video_path)
