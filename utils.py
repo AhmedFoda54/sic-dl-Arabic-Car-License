@@ -1,12 +1,13 @@
 import cv2
-#cv2.imshow = lambda *args: None
+cv2.imshow = lambda *args: None
 
 import numpy as np
 from PIL import Image
 import streamlit as st
 from ultralytics import YOLO
 import easyocr
-
+import tempfile
+import os
 
 # Function to apply morphological operations: dilation, erosion, and gap filling
 def apply_morphological_operations(image):
@@ -236,3 +237,119 @@ def detect_text_yolo(ocr_yolo_model, cropped_image):
     # Return the recognized image
     return recognized_image, detected_numbers, detected_letters
 
+
+# Function to detect the plate's bounding box (without cropping) and return coordinates
+def detect_Plate_video(yolo_model, img):
+    model = YOLO(yolo_model)
+    results = model.predict(source=img, conf=0.25)
+
+    for result in results:
+        if result.boxes is not None and len(result.boxes) > 0:
+            max_width = -1
+            selected_box = None
+
+            for box in result.boxes:
+                res = box.xyxy[0]
+                width = res[2].item() - res[0].item()
+
+                if width > max_width:
+                    max_width = width
+                    selected_box = res
+
+            if selected_box is not None:
+                x_min = int(selected_box[0].item())
+                y_min = int(selected_box[1].item())
+                x_max = int(selected_box[2].item())
+                y_max = int(selected_box[3].item())
+
+                return x_min, y_min, x_max, y_max
+
+    return None
+
+def process_video_with_plate_detection(video_file, yolo_model, ocr_yolo_model):
+    tfile = tempfile.NamedTemporaryFile(delete=False)
+    tfile.write(video_file.read())
+
+    cap = cv2.VideoCapture(tfile.name)
+
+    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
+
+    temp_output_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
+    output_file_path = temp_output_file.name
+
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    out = cv2.VideoWriter(output_file_path, fourcc, fps, (frame_width, frame_height))
+
+    frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    current_frame = 0
+    progress_bar = st.progress(0)
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        img_pil = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+
+        try:
+            plate_coords = detect_Plate_video(yolo_model, img_pil)
+            if plate_coords is not None:
+                x_min, y_min, x_max, y_max = plate_coords
+
+                # Validate bounding box coordinates
+                x_min = max(0, min(x_min, frame_width - 1))
+                y_min = max(0, min(y_min, frame_height - 1))
+                x_max = max(0, min(x_max, frame_width - 1))
+                y_max = max(0, min(y_max, frame_height - 1))
+
+                print(f"Plate coords: x_min={x_min}, y_min={y_min}, x_max={x_max}, y_max={y_max}")
+
+                if x_min >= x_max or y_min >= y_max:
+                    print("Invalid bounding box dimensions.")
+                    continue
+
+                cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
+
+                roi = frame[y_min:y_max, x_min:x_max]
+
+                yolocr_results, nums, chars = detect_text_yolo(ocr_yolo_model, roi)
+
+                if yolocr_results is not None and len(yolocr_results) > 0:
+                    for result, num, char in zip(yolocr_results, nums, chars):
+                        if len(result) >= 4:
+                            x, y, w, h = result[:4]
+
+                            x = max(0, min(x_min + x, frame_width - 1))
+                            y = max(0, min(y_min + y, frame_height - 1))
+                            w = max(0, min(x + w, frame_width - 1)) - x
+                            h = max(0, min(y + h, frame_height - 1)) - y
+
+                            # Validate coordinates before drawing
+                            if x >= 0 and y >= 0 and (x + w) < frame_width and (y + h) < frame_height:
+                                cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                                cv2.putText(frame, f"{char}", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX,
+                                            0.9, (255, 0, 0), 2)
+                            else:
+                                print(f"Invalid character bounding box coordinates: {x}, {y}, {w}, {h}")
+
+                else:
+                    print("No characters detected in ROI.")
+
+            else:
+                print("No plate detected.")
+
+        except Exception as e:
+            print(f"Error processing frame: {e}")
+            # st.error(f"Error processing frame: {e}")
+
+        out.write(frame)
+        current_frame += 1
+        progress_bar.progress(current_frame / frame_count)
+
+    cap.release()
+    out.release()
+    os.remove(tfile.name)
+
+    return output_file_path
