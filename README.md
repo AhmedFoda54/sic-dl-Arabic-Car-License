@@ -43,12 +43,15 @@ The project is divided into two main sections:
     streamlit run ocr_app.py
     ```
 
-2. The web interface will allow you to upload either an image or a video for detection and recognition.
+2. The web interface will allow you to upload either an image or a video for detection and recognition.[Streamlit Web App](https://arabic-car-license-aelpr.streamlit.app/)
 
 ## Dataset
 This project utilizes an Egyptian Arabic License Plate (EALPR) dataset. If you are using a different dataset, make sure the labels are in the appropriate format for YOLO.
 1. first dataset on Kaggle for detecting license car plates: [Egyptian Car Plates](https://www.kaggle.com/datasets/mahmoudeldebase/egyptian-cars-plates)
 2. Second dataset on Roboflow for Recognition of Arabic numbers and letters: [egyptian car plates Dataset](https://universe.roboflow.com/alyalsayed-vyx6g/egyptian-car-plates/dataset/13)
+
+## Notebook
+This is out Kaggle Notebook, you can have a look for more detailed work: [Kaggle Notebook](https://www.kaggle.com/code/ahmedashrafhelmi/egyptian-car-plates-yolov11-fine-tuned-easyocr)
 
 ## Model
 The project uses the YOLOv11 Detection to detect license car plates then YOLOv11 OCR model for recognition of Arabic letters and numbers. Fine-tuning of the model was done on the EALPR dataset. The recognized characters are stored in a dictionary and drawn on the output image or video.
