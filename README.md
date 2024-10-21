@@ -11,8 +11,8 @@ This project implements a deep learning-based system for detecting and recognizi
 
 ## Project Structure
 The project is divided into two main sections:
-1. **Detection**: Detects the car plate in images or video frames. If the input is an image of a car, it will crop the plate and pass it to the next stage.
-2. **Recognition**: If the input is a cropped car plate image or the plate detected from the first stage, it recognizes the Arabic characters (numbers and letters).
+1. **Detection**: Detects the car plate in images or video frames. If the input is an image of a car, it will crop the plate using YOLOv11 and pass it to the next stage.
+2. **Recognition**: If the input is a cropped car plate image or the plate detected from the first stage, it recognizes the Arabic characters (numbers and letters) using YOLOv11 & EasyOCR.
 
 ## Installation
 
